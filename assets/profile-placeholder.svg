@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 900" role="img" aria-labelledby="title desc">
+  <title id="title">个人照片占位图</title>
+  <desc id="desc">用于替换为雷思静个人照片的位置</desc>
+  <rect width="720" height="900" fill="#fffaf0"/>
+  <rect x="48" y="48" width="624" height="804" rx="22" fill="#f3efe4" stroke="#d9d0bd" stroke-width="2"/>
+  <circle cx="360" cy="318" r="122" fill="#0e7c74" opacity=".18"/>
+  <circle cx="360" cy="292" r="86" fill="#0e7c74" opacity=".42"/>
+  <path d="M185 652c26-113 96-178 175-178s149 65 175 178c8 36-20 70-57 70H242c-37 0-65-34-57-70z" fill="#e96146" opacity=".56"/>
+  <path d="M212 780h296" stroke="#18202a" stroke-width="8" stroke-linecap="round" opacity=".18"/>
+  <text x="360" y="802" fill="#18202a" font-family="Arial, sans-serif" font-size="28" font-weight="800" text-anchor="middle" opacity=".62">替换为个人照片</text>
+</svg>
