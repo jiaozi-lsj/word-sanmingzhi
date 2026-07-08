@@ -1,5 +1,29 @@
 import { GAME_COPY } from '../config.js';
 
+function todayText() {
+  const date = new Date();
+  const pad = (value) => String(value).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+function buildReviewReport(result) {
+  const lines = [
+    '【Word Snake 单词贪吃蛇复习结果】',
+    `日期：${todayText()}`,
+    '昵称：小勇士',
+    `总单词数：${result.totalWordCount}`,
+    `未过关单词数：${result.unpassedWordCount}`,
+    `首次正确率：${result.firstAccuracy}%`,
+    `用时：${result.durationSec} 秒`,
+    '',
+    '单词过关情况：',
+    ...result.wordResults.map((item, index) =>
+      `${index + 1}. ${item.word.en} - ${item.word.zh}：${item.status}`
+    )
+  ];
+  return lines.join('\n');
+}
+
 export class ResultView {
   constructor(root, { result, onRestart, onHome }) {
     this.root = root;
@@ -13,14 +37,10 @@ export class ResultView {
     const avgSeconds = this.result.avgReactionTimeMs
       ? `${(this.result.avgReactionTimeMs / 1000).toFixed(1)}s`
       : '-';
-    const weakList = this.result.weakWords.length
-      ? this.result.weakWords
-          .map((item) => `<li><strong>${item.word.en}</strong><span>${item.word.zh}</span></li>`)
-          .join('')
-      : '<li><strong>很稳</strong><span>本局没有明显薄弱词</span></li>';
     const snakeWords = this.result.finalSnakeWords.length
       ? this.result.finalSnakeWords.map((item) => `<span>${item.label}</span>`).join('')
       : '<span>继续挑战</span>';
+    const report = buildReviewReport(this.result);
 
     this.root.innerHTML = `
       <main class="result-view">
@@ -31,15 +51,18 @@ export class ResultView {
 
           <div class="metrics-grid">
             <article><span>完成词数</span><strong>${this.result.completedWordCount}/${this.result.totalWordCount}</strong></article>
-            <article><span>首次正确</span><strong>${this.result.firstTryCorrectCount}</strong></article>
-            <article><span>错误次数</span><strong>${this.result.wrongAttemptCount}</strong></article>
+            <article><span>未过关</span><strong>${this.result.unpassedWordCount}</strong></article>
+            <article><span>首次正确率</span><strong>${this.result.firstAccuracy}%</strong></article>
             <article><span>平均反应</span><strong>${avgSeconds}</strong></article>
             <article><span>总分</span><strong>${this.result.score}</strong></article>
           </div>
 
-          <section class="weak-section">
-            <h2>薄弱词</h2>
-            <ul>${weakList}</ul>
+          <section class="copy-card" aria-labelledby="review-title">
+            <div class="copy-card-head">
+              <h2 id="review-title">今日复习报告</h2>
+              <button class="secondary-action compact" data-action="copy">复制</button>
+            </div>
+            <pre id="review-report">${report}</pre>
           </section>
 
           <div class="result-actions">
@@ -52,5 +75,14 @@ export class ResultView {
 
     this.root.querySelector('[data-action="restart"]').addEventListener('click', this.onRestart);
     this.root.querySelector('[data-action="home"]').addEventListener('click', this.onHome);
+    this.root.querySelector('[data-action="copy"]').addEventListener('click', async () => {
+      const text = this.root.querySelector('#review-report').textContent;
+      try {
+        await navigator.clipboard.writeText(text);
+        this.root.querySelector('[data-action="copy"]').textContent = '已复制';
+      } catch {
+        prompt('复制以下复习结果：', text);
+      }
+    });
   }
 }

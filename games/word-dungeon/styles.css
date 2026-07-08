@@ -802,6 +802,238 @@ textarea:focus {
   display: none !important;
 }
 
+.brand-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  margin: 0 0 14px;
+  padding: 4px 12px;
+  color: #0f4ecb;
+  background: #eaf4ff;
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.home-gate-content {
+  grid-template-columns: minmax(360px, 1fr) minmax(300px, 420px);
+}
+
+.dungeon-hero-copy {
+  color: #fff;
+}
+
+.dungeon-word-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.dungeon-word-preview span {
+  min-height: 42px;
+  padding: 10px 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: 999px;
+  color: #0f2d46;
+  background: rgba(255, 255, 255, 0.86);
+  font-weight: 900;
+}
+
+.home-note {
+  margin: 18px 0 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-weight: 800;
+}
+
+.start-wide {
+  width: 100%;
+  min-height: 54px;
+  font-size: 18px;
+}
+
+.result-card {
+  width: min(920px, 100%);
+  margin: 0 auto;
+}
+
+.unified-result-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.result-button-row {
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.rotate-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: none;
+  place-items: center;
+  padding: 28px;
+  background:
+    radial-gradient(circle at 50% 24%, rgba(37, 99, 235, 0.24), transparent 34%),
+    rgba(247, 251, 255, 0.97);
+  text-align: center;
+}
+
+.rotate-card {
+  width: min(340px, 100%);
+  padding: 24px 22px;
+  border: 1px solid rgba(37, 99, 235, 0.22);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 22px 54px rgba(31, 41, 55, 0.18);
+}
+
+.rotate-icon {
+  display: grid;
+  place-items: center;
+  width: 62px;
+  height: 62px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--blue);
+  font-size: 2rem;
+  font-weight: 900;
+}
+
+.rotate-card strong {
+  display: block;
+  font-size: 1.35rem;
+}
+
+.rotate-card p {
+  margin: 10px 0 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+@media (hover: none) and (pointer: coarse) and (orientation: portrait) {
+  .rotate-overlay {
+    display: grid;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 540px) {
+  .student-gate,
+  .gate-content {
+    min-height: 100vh;
+  }
+
+  .gate-content {
+    grid-template-columns: minmax(320px, 1fr) minmax(260px, 360px);
+    gap: 16px;
+    padding: max(14px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+  }
+
+  .gate-title {
+    font-size: clamp(30px, 7vw, 46px);
+  }
+
+  .gate-subtitle {
+    margin-top: 10px;
+    font-size: 15px;
+    line-height: 1.45;
+  }
+
+  .dungeon-word-preview {
+    margin-top: 14px;
+    gap: 8px;
+  }
+
+  .dungeon-word-preview span {
+    min-height: 34px;
+    padding: 7px 12px;
+    font-size: 13px;
+  }
+
+  .home-note {
+    margin-top: 12px;
+    font-size: 13px;
+  }
+
+  .start-panel {
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .avatar-choice {
+    min-height: 78px;
+  }
+
+  .avatar-face {
+    width: 56px;
+    height: 50px;
+  }
+
+  .start-wide {
+    min-height: 46px;
+    font-size: 16px;
+  }
+
+  .screen {
+    padding: max(12px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+  }
+
+  .page-title {
+    font-size: clamp(22px, 5vw, 34px);
+  }
+
+  .unified-result-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .metric {
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .metric strong {
+    font-size: clamp(18px, 3vw, 24px);
+  }
+
+  .copy-card {
+    margin: 10px 0;
+    padding: 10px;
+  }
+
+  .copy-card pre {
+    max-height: 126px;
+    overflow: auto;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .game-hud {
+    top: max(8px, env(safe-area-inset-top));
+    left: max(8px, env(safe-area-inset-left));
+    right: max(8px, env(safe-area-inset-right));
+  }
+
+  .target-chip {
+    top: 78px;
+  }
+
+  .game-feedback {
+    bottom: max(54px, env(safe-area-inset-bottom));
+    max-width: min(520px, 72vw);
+  }
+
+  .game-actions {
+    bottom: max(8px, env(safe-area-inset-bottom));
+  }
+}
+
 @media (max-width: 900px) {
   .topbar {
     position: static;
@@ -986,5 +1218,53 @@ textarea:focus {
   .copy-card-head {
     align-items: flex-start;
     flex-direction: column;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) and (orientation: landscape) and (max-height: 540px) {
+  .gate-content {
+    grid-template-columns: minmax(320px, 1fr) minmax(260px, 360px);
+    min-height: 100vh;
+    gap: 16px;
+    padding: max(14px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+  }
+
+  .gate-title {
+    font-size: clamp(30px, 7vw, 46px);
+  }
+
+  .gate-subtitle {
+    margin-top: 10px;
+    font-size: 15px;
+    line-height: 1.45;
+  }
+
+  .start-panel {
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .avatar-choice {
+    min-height: 78px;
+  }
+
+  .avatar-face {
+    width: 56px;
+    height: 50px;
+  }
+
+  #gameCanvas,
+  .game-immersive #gameCanvas {
+    width: 100%;
+    height: 100vh;
+    min-height: 100vh;
+  }
+
+  .unified-result-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .copy-card pre {
+    max-height: 126px;
   }
 }

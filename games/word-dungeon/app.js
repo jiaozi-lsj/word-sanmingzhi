@@ -70,7 +70,7 @@ const ROOMS = [
 ];
 
 const state = {
-  view: "teacher",
+  view: "student",
   taskId: "",
   playerName: localStorage.getItem("wordDungeonPlayerName") || "小勇士",
   avatar: localStorage.getItem("wordDungeonHero") || "boy",
@@ -208,7 +208,7 @@ function routeFromUrl() {
   if (taskFromUrl) state.taskId = taskFromUrl;
   if (!state.taskId) state.taskId = state.data.lastTaskId || state.data.tasks[0]?.task_id || "";
   const hash = location.hash.replace("#", "");
-  if (["teacher", "student", "results"].includes(hash)) state.view = hash;
+  if (["student"].includes(hash)) state.view = hash;
   if (taskFromUrl) state.view = "student";
 }
 
@@ -335,13 +335,13 @@ function render() {
     state.game.destroy();
     state.game = null;
   }
-  if (state.view === "teacher") app.innerHTML = renderTeacher();
-  if (state.view === "student") app.innerHTML = renderStudentGate();
+  if (state.view === "teacher") state.view = "student";
+  if (state.view === "student") app.innerHTML = renderStudentGateV2();
   if (state.view === "game") {
     app.innerHTML = renderGame();
     startGame();
   }
-  if (state.view === "settlement") app.innerHTML = renderSettlement();
+  if (state.view === "settlement") app.innerHTML = renderSettlementV2();
   if (state.view === "results") app.innerHTML = renderResults();
   bindCommon();
 }
@@ -980,7 +980,7 @@ class WordDungeonGame {
     this.meanings = [this.makeMeaning(bossWord)];
     this.monsters = [this.makeMonster(bossWord, true, 4), ...distractors.map((word, index) => this.makeMonster(word, false, index))];
     this.items = [];
-    this.setFeedback(`Boss 挑战 ${this.bossPhase + 1}/2：再次确认薄弱词。`);
+    this.setFeedback(`Boss 挑战 ${this.bossPhase + 1}/2：再次确认待复习单词。`);
   }
   makeObstacles(boss = false, theme = this.roomTheme || "office") {
     const w = this.width;
@@ -1273,7 +1273,7 @@ class WordDungeonGame {
     this.currentTargetId = null;
     this.currentTargetZh = "";
     this.combo = 0;
-    this.setFeedback("已跳过，这个词会作为薄弱词处理。");
+    this.setFeedback("已跳过，这个词会作为待复习单词处理。");
     if (this.roomKind === "boss") {
       this.bossAttempts += 1;
       if (this.bossAttempts >= 3) setTimeout(() => this.end("completed"), 750);
@@ -1616,8 +1616,8 @@ function bindResults() {
 
 function bindViewSpecific() {
   if (state.view === "teacher") bindTeacher();
-  if (state.view === "student") bindStudentGate();
-  if (state.view === "settlement") bindSettlement();
+  if (state.view === "student") bindStudentGateV2();
+  if (state.view === "settlement") bindSettlementV2();
   if (state.view === "results") bindResults();
 }
 
@@ -1856,10 +1856,165 @@ function text(c, value, x, y, size, color, weight = "normal", family = '"Microso
   c.fillText(value, x, y);
 }
 
+function renderStudentGateV2() {
+  const task = getTask(state.taskId, true);
+  if (task && state.taskId !== task.task_id) {
+    state.taskId = task.task_id;
+    state.data.lastTaskId = task.task_id;
+    saveData();
+  }
+  const safeName = escapeHtml(state.playerName || "小勇士");
+  const previewWords = (task?.words || []).slice(0, 4);
+  return shell(`
+    <main class="student-gate dungeon-home">
+      <div class="gate-content home-gate-content">
+        <section class="dungeon-hero-copy">
+          <p class="brand-pill">单词地牢</p>
+          <h1 class="gate-title">Word Dungeon</h1>
+          <p class="gate-subtitle">看中文线索，选择正确英文，在地牢房间里完成一局词汇挑战。</p>
+          <div class="dungeon-word-preview" aria-label="本局单词预览">
+            ${previewWords.map((word) => `<span>${escapeHtml(word.en)}</span>`).join("")}
+          </div>
+          <p class="home-note">本局 ${task?.words.length || 10} 词 · 横屏体验 · 结算后可复制复习结果</p>
+        </section>
+        <section class="start-panel dungeon-start-panel">
+          <label class="field">
+            <span>你的昵称</span>
+            <input id="playerName" maxlength="12" value="${safeName}" />
+          </label>
+          <div>
+            <strong>选择你的勇士</strong>
+            <div class="avatar-grid" id="avatarGrid">
+              ${[
+                ["boy", "男勇士"],
+                ["girl", "女勇士"],
+              ].map(([id, label]) => `
+                <button class="avatar-choice ${state.avatar === id ? "is-active" : ""}" data-avatar="${id}">
+                  <span class="avatar-face avatar-${id}"></span>
+                  <span class="avatar-label">${label}</span>
+                </button>
+              `).join("")}
+            </div>
+          </div>
+          <button class="primary-button start-wide" id="startGameButton">开始3分钟挑战</button>
+          <p id="studentStatus" class="status">${escapeHtml(task?.task_name || "示例任务")} · 准备进入地牢</p>
+        </section>
+      </div>
+    </main>
+  `, { hideNav: true });
+}
+
+function bindStudentGateV2() {
+  document.querySelector("#playerName")?.addEventListener("input", (event) => {
+    state.playerName = event.target.value.trim() || "小勇士";
+    localStorage.setItem("wordDungeonPlayerName", state.playerName);
+  });
+  document.querySelectorAll("[data-avatar]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.avatar = button.dataset.avatar;
+      localStorage.setItem("wordDungeonHero", state.avatar);
+      document.querySelectorAll("[data-avatar]").forEach((item) => item.classList.toggle("is-active", item === button));
+    });
+  });
+  document.querySelector("#startGameButton")?.addEventListener("click", () => {
+    const task = getTask(state.taskId, true);
+    if (!task) {
+      document.querySelector("#studentStatus").textContent = "暂时没有可用词汇，请刷新页面后再试。";
+      return;
+    }
+    state.taskId = task.task_id;
+    state.data.lastTaskId = task.task_id;
+    state.playerName = document.querySelector("#playerName").value.trim() || "小勇士";
+    localStorage.setItem("wordDungeonPlayerName", state.playerName);
+    saveData();
+    state.view = "game";
+    render();
+  });
+}
+
+function isWordPassedV2(row) {
+  return ["稳定", "基本掌握", "已过关"].includes(row.final_status);
+}
+
+function unpassedWordsV2(session) {
+  return session.word_summaries.filter((row) => !isWordPassedV2(row));
+}
+
+function wordPassTextV2(row) {
+  return isWordPassedV2(row) ? "已过关" : "重点复习";
+}
+
+function buildStudentReportV2(session) {
+  const unpassed = unpassedWordsV2(session);
+  const lines = [
+    "【Word Dungeon 单词地牢复习结果】",
+    `日期：${sessionDate(session)}`,
+    `昵称：${session.player_name}`,
+    `总单词数：${session.word_count}`,
+    `未过关单词数：${unpassed.length}`,
+    `首次正确率：${Math.round(session.first_accuracy * 100)}%`,
+    `用时：${session.duration_sec} 秒`,
+    "",
+    "单词过关情况：",
+    ...session.word_summaries.map((row, index) =>
+      `${index + 1}. ${row.en} - ${row.zh}：${wordPassTextV2(row)}`
+    ),
+  ];
+  return lines.join("\n");
+}
+
+function renderSettlementV2() {
+  const session = state.currentSession || state.data.sessions[state.data.sessions.length - 1];
+  if (!session) {
+    return shell(`
+      <main class="screen">
+        <section class="card">
+          <h1 class="page-title">还没有生成复习结果</h1>
+          <button class="primary-button" id="again">返回开始页</button>
+        </section>
+      </main>
+    `, { hideNav: true });
+  }
+  const report = buildStudentReportV2(session);
+  const unpassedCount = unpassedWordsV2(session).length;
+  return shell(`
+    <main class="screen settlement-screen">
+      <section class="card result-card">
+        <p class="brand-pill">学习结算</p>
+        <h1 class="page-title">${escapeHtml(session.player_name)}，今天的地牢挑战完成啦</h1>
+        <div class="settlement-grid unified-result-grid">
+          <div class="metric">完成词数<strong>${session.word_count - unpassedCount}/${session.word_count}</strong></div>
+          <div class="metric">未过关<strong>${unpassedCount}</strong></div>
+          <div class="metric">首次正确率<strong>${Math.round(session.first_accuracy * 100)}%</strong></div>
+          <div class="metric">用时<strong>${session.duration_sec} 秒</strong></div>
+          <div class="metric">分数<strong>${session.score}</strong></div>
+        </div>
+        <div class="copy-card">
+          <div class="copy-card-head">
+            <h2 class="section-title">今日复习报告</h2>
+            <button class="small-button" id="copyStudentReport">复制</button>
+          </div>
+          <pre id="studentReportText">${escapeHtml(report)}</pre>
+        </div>
+        <div class="button-row result-button-row">
+          <button class="ghost-button" id="again">再来一局</button>
+          <button class="primary-button" id="backHome">返回开始页</button>
+        </div>
+      </section>
+    </main>
+  `, { hideNav: true });
+}
+
+function bindSettlementV2() {
+  const report = document.querySelector("#studentReportText")?.textContent || "";
+  document.querySelector("#copyStudentReport")?.addEventListener("click", () => copyText(report, "今日复习报告已复制。"));
+  document.querySelector("#again")?.addEventListener("click", () => navigate("student"));
+  document.querySelector("#backHome")?.addEventListener("click", () => navigate("student"));
+}
+
 function boot() {
   routeFromUrl();
   render();
-  bindViewSpecific();
 }
 
 const originalRender = render;

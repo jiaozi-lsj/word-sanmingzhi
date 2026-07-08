@@ -11,6 +11,7 @@ export function calculateResult(session, words, finalSnakeWords, reason) {
     : 0;
 
   const wordById = new Map(words.map((word) => [word.id, word]));
+  const completedIds = new Set(session.completedWordIds);
   const weakWords = performances
     .map((perf) => {
       const slowCount = perf.reactionTimesMs.filter((time) => time > CONFIG.SLOW_THRESHOLD_MS).length;
@@ -20,16 +21,34 @@ export function calculateResult(session, words, finalSnakeWords, reason) {
     .filter((item) => item.riskScore > 0)
     .sort((a, b) => b.riskScore - a.riskScore)
     .slice(0, 5);
+  const wordResults = words.map((word) => {
+    const passed = completedIds.has(word.id);
+    return {
+      word,
+      passed,
+      status: passed ? '已过关' : '重点复习'
+    };
+  });
+  const durationSec = session.endedAt && session.startedAt
+    ? Math.max(1, Math.round((session.endedAt - session.startedAt) / 1000))
+    : CONFIG.ROUND_TIME_SEC;
+  const firstAccuracy = words.length
+    ? Math.round((firstTryCorrectCount / words.length) * 100)
+    : 0;
 
   return {
     reason,
     score: session.score,
     completedWordCount: resolved.length,
     totalWordCount: words.length,
+    unpassedWordCount: wordResults.filter((item) => !item.passed).length,
     firstTryCorrectCount,
+    firstAccuracy,
     wrongAttemptCount,
     avgReactionTimeMs,
+    durationSec,
     weakWords,
-    finalSnakeWords
+    finalSnakeWords,
+    wordResults
   };
 }
